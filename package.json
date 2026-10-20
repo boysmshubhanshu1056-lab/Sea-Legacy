@@ -1,0 +1,15 @@
+{
+  "name": "sea-legacy",
+  "version": "1.0.0",
+  "description": "Sea Legacy Game",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.0.0"
+  }
+}
