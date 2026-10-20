@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ios:
-    runs-on: macos-latest # Mac is required for iOS compilation
-    
+  # STEP 1: Build the game data on Linux (No memory crashes)
+  build-pck:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -19,30 +19,49 @@ jobs:
           version: 4.2.1
           use-dotnet: false
 
+      - name: Export PCK
+        run: |
+          mkdir -p build
+          godot --headless --export-release "Linux" build/Sea_Legacy.pck
+
+      - name: Upload PCK
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-pck
+          path: build/Sea_Legacy.pck
+
+  # STEP 2: Wrap it in the iOS Engine on Mac
+  build-ipa:
+    needs: build-pck
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download PCK
+        uses: actions/download-artifact@v4
+        with:
+          name: game-pck
+          path: build/
+
       - name: Download iOS Template
         run: |
           wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           unzip -q Godot_v4.2.1-stable_export_templates.tpz
-          # The iOS template is a zip inside the templates folder
+          # Unzip ONLY the iOS engine
           unzip -q templates/ios.zip -d ios_template
-
-      - name: Export Game Data (PCK)
-        run: |
-          mkdir -p build
-          # Export the data safely on Mac
-          godot --headless --export-release "Linux" build/Sea_Legacy.pck
 
       - name: Inject Game into iOS App
         run: |
-          # Copy the pre-compiled app structure
+          # Copy the iOS app structure
           cp -r ios_template/* build/Payload/
-          # Rename the default app folder to our app name
+          # Rename it to our app name
           mv build/Payload/Godot.app build/Payload/Sea_Legacy.app
           
-          # Rename the executable inside the app
+          # Rename the executable
           mv build/Payload/Sea_Legacy.app/Godot build/Payload/Sea_Legacy.app/Sea_Legacy
           
-          # Inject our game data
+          # Put the game data inside
           cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
 
       - name: Zip into .ipa
