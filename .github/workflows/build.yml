@@ -6,68 +6,77 @@ on:
   workflow_dispatch:
 
 jobs:
-  # STEP 1: Build the game data on Linux (No memory crashes)
-  build-pck:
+  build-ios:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v1
-        with:
-          version: 4.2.1
-          use-dotnet: false
+      - name: Download Godot & Templates
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
+          unzip -q Godot_v4.2.1-stable_linux.x86_64.zip
+          chmod +x Godot_v4.2.1-stable_linux.x86_64
+          
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          mkdir -p /home/runner/.local/share/godot/export_templates/4.2.1.stable
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mv templates/* /home/runner/.local/share/godot/export_templates/4.2.1.stable/
 
-      - name: Export PCK
+      - name: Export PCK (Linux)
         run: |
           mkdir -p build
-          godot --headless --export-release "Linux" build/Sea_Legacy.pck
+          ./Godot_v4.2.1-stable_linux.x86_64 --headless --export-release "Linux" build/Sea_Legacy.pck
+          ls -la build/
 
-      - name: Upload PCK
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-pck
-          path: build/Sea_Legacy.pck
-
-  # STEP 2: Wrap it in the iOS Engine on Mac
-  build-ipa:
-    needs: build-pck
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Download PCK
-        uses: actions/download-artifact@v4
-        with:
-          name: game-pck
-          path: build/
-
-      - name: Download iOS Template
+      - name: Assemble iOS IPA
         run: |
-          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          unzip -q Godot_v4.2.1-stable_export_templates.tpz
-          # Unzip ONLY the iOS engine
-          unzip -q templates/ios.zip -d ios_template
-
-      - name: Inject Game into iOS App
-        run: |
-          # Copy the iOS app structure
-          cp -r ios_template/* build/Payload/
-          # Rename it to our app name
-          mv build/Payload/Godot.app build/Payload/Sea_Legacy.app
+          # Extract iOS template
+          unzip -q /home/runner/.local/share/godot/export_templates/4.2.1.stable/ios.zip -d ios_template
           
-          # Rename the executable
-          mv build/Payload/Sea_Legacy.app/Godot build/Payload/Sea_Legacy.app/Sea_Legacy
+          # Create Payload structure
+          mkdir -p build/Payload/Sea_Legacy.app
+          cp -r ios_template/* build/Payload/Sea_Legacy.app/
           
-          # Put the game data inside
+          # Rename app and executable
+          mv build/Payload/Sea_Legacy.app/Godot.app build/Payload/Sea_Legacy.app_temp 2>/dev/null || true
+          # Handle different possible structures in template
+          if [ -d "build/Payload/Sea_Legacy.app_temp" ]; then
+            mv build/Payload/Sea_Legacy.app_temp/* build/Payload/Sea_Legacy.app/ 2>/dev/null || true
+            rmdir build/Payload/Sea_Legacy.app_temp 2>/dev/null || true
+          fi
+          
+          # Find and rename executable (may be named Godot or similar)
+          find build/Payload/Sea_Legacy.app -maxdepth 1 -name "Godot" -exec mv {} build/Payload/Sea_Legacy.app/Sea_Legacy \;
+          
+          # Inject PCK
           cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
+          
+          # Create Info.plist if missing
+          if [ ! -f "build/Payload/Sea_Legacy.app/Info.plist" ]; then
+            cat << 'EOF' > build/Payload/Sea_Legacy.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleDisplayName</key><string>Sea Legacy</string>
+            <key>CFBundleExecutable</key><string>Sea_Legacy</string>
+            <key>CFBundleIdentifier</key><string>com.prince.sealegacy</string>
+            <key>CFBundleName</key><string>Sea Legacy</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleShortVersionString</key><string>1.0</string>
+            <key>CFBundleVersion</key><string>1.0</string>
+          </dict>
+          </plist>
+          EOF
+          fi
 
-      - name: Zip into .ipa
+      - name: Zip IPA
         run: |
           cd build
           zip -r SeaLegacy.ipa Payload/
+          ls -la SeaLegacy.ipa
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
