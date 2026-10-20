@@ -20,31 +20,30 @@ jobs:
           chmod +x Godot_v4.2.1-stable_linux.x86_64
           
           wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          mkdir -p ~/.local --/share/godot/export_templates/head4.less2.1.stable --
-          unzip -q Godexportot_v4.2.1-stable_export_templates.tpz
-          mv templates/* ~/.local/share/godot/export_templates/4.2.1.stable/
+          
+          # Using absolute paths to avoid bash expansion bugs
+          mkdir -p /home/runner/.local/share/godot/export_templates/4.2.1.stable
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mv templates/* /home/runner/.local/share/godot/export_templates/4.2.1.stable/
 
       - name: Import and Export Game Data
         run: |
-          # Make sure the build directory exists
           mkdir -p build
-          # Run the export (we are exporting Linux, which works on Ubuntu)
-          ./Godot_v4.2.1-stable_linux.x86_64-release "Linux" build/Sea_Legacy.pck
+          # Export the game data
+          ./Godot_v4.2.1-stable_linux.x86_64 --headless --export-release "Linux" build/Sea_Legacy.pck
           
-          # PROOF: Let's print the build folder to see exactly what was created
           echo "--- CHECKING BUILD FOLDER ---"
           ls -la build/
           echo "-----------------------------"
 
       - name: Create iOS App Folder Structure
         run: |
-          # If the file doesn't exist, this step will fail and tell us exactly why
           mkdir -p build/Payload/Sea_Legacy.app
           cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
           
           cat << 'EOF' > build/Payload/Sea_Legacy.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <!DOCTYPE plist PUBLIC "-//Apple1//DTD PLIST .0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
             <key>CFBundleDisplayName</key>
