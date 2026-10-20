@@ -19,12 +19,8 @@ jobs:
           version: 4.2.1
           use-dotnet: false
 
-      - name: Download Export Templates
-        run: |
-          wget https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          mkdir -p ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable
-          tar -xvzf Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable/
+      # The custom download step is removed. 
+      # The export action below handles templates automatically.
 
       - name: Export iOS
         uses: firebelley/godot-export@v5.2.0
