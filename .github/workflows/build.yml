@@ -3,11 +3,11 @@ name: Build iOS IPA
 on:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Allows you to run it manually from GitHub
+  workflow_dispatch:
 
 jobs:
   build-ios:
-    runs-on: macos-latest # Apple builds MUST run on a Mac runner
+    runs-on: macos-latest
     
     steps:
       - name: Checkout Code
@@ -21,7 +21,7 @@ jobs:
 
       - name: Download Export Templates
         run: |
-          wget https://downloads.tuxfamily.org/godotengine/4.2.1/Godot_v4.2.1-stable_export_templates.tpz
+          wget https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           mkdir -p ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable
           tar -xvzf Godot_v4.2.1-stable_export_templates.tpz
           mv templates/* ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable/
@@ -29,8 +29,8 @@ jobs:
       - name: Export iOS
         uses: firebelley/godot-export@v5.2.0
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.2.1/Godot_v4.2.1-stable_macos.universal.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.2.1/Godot_v4.2.1-stable_export_templates.tpz
+          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_macos.universal.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           relative_project_path: ./
           archive_output: true
 
