@@ -83,7 +83,6 @@
         </div>
     </div>
 
-    <!-- SHOP MODAL -->
     <div id="shop-modal" class="modal">
         <h2>Shop</h2>
         <div class="item-row"><span>Rumble Fruit ($60,000)</span><button class="buy-btn" id="btn-Rumble" onclick="buyItem('Rumble', 60000)">BUY</button></div>
@@ -95,7 +94,6 @@
         <button class="close-btn" onclick="closeModals()">CLOSE</button>
     </div>
 
-    <!-- INVENTORY MODAL -->
     <div id="bag-modal" class="modal">
         <h2>Inventory</h2>
         <div id="inventory-list"></div>
@@ -103,6 +101,10 @@
     </div>
 
     <script>
+        // --- SECURE ADMIN SETTINGS ---
+        const ADMIN_USER = "prince";
+        const ADMIN_PASS = "lakshyaiskingofallpiratesandbitches";
+
         let scene, camera, renderer, player, ground;
         let isGameRunning = false;
         let currentLevel = 1, currentSea = 1, isAdmin = false, currentUser = "";
@@ -110,7 +112,6 @@
         let inventory = ["Combat"]; 
         let equippedItem = "Combat";
         let cooldowns = {1: false, 2: false, 3: false, 4: false};
-
         let moveX = 0, moveZ = 0, baseSpeed = 0.3, currentSpeed = 0.3;
 
         function getAccounts() { return JSON.parse(localStorage.getItem('seaLegacyAccounts')) || {}; }
@@ -121,15 +122,18 @@
             const pass = document.getElementById('password').value.trim();
             if(user === "" || pass === "") return alert("Enter username and password.");
 
-            let accounts = getAccounts();
-
-            if(user.toLowerCase() === "prince") {
-                if(accounts["Prince"] && accounts["Prince"].password !== pass) return alert("Wrong password.");
-                accounts["Prince"] = { password: pass, level: 2450, money: 99999999 };
-                saveAccounts(accounts);
-                isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
-                if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru"); // ADMIN EXCLUSIVE
-            } else {
+            // 1. Admin Login Check
+            if(user.toLowerCase() === ADMIN_USER) {
+                if(pass === ADMIN_PASS) {
+                    isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
+                    if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru"); 
+                } else {
+                    return alert("Wrong password for this user.");
+                }
+            } 
+            // 2. Normal Player Login / Register
+            else {
+                let accounts = getAccounts();
                 if(accounts[user]) {
                     if(accounts[user].password !== pass) return alert("Wrong password.");
                     isAdmin = false; currentLevel = accounts[user].level; currentMoney = accounts[user].money;
@@ -197,7 +201,6 @@
                 
                 if(val.startsWith("/lvl ")) { currentLevel = parseInt(val.split(" ")[1]); updateUI(); }
                 else if(val === "/g") { currentMoney = 99999999; updateUI(); }
-                else if(val.startsWith("/tp ")) { /* Logic for teleporting to players later */ }
                 else if(val === "/br") { player.position.set(0, 2, 0); }
             }
         }
@@ -254,30 +257,24 @@
             renderer.render(scene, camera);
         }
 
-        // --- BLOX FRUITS STYLE MOVES ---
         function useSkill(num) {
             if(cooldowns[num]) return;
-
             const btn = document.getElementById('skill-' + num);
             cooldowns[num] = true;
             btn.classList.add('cooling');
 
             if(equippedItem === "True Triple Yoru") {
-                // Three massive slashes
                 for(let i=0; i<3; i++) {
                     setTimeout(() => {
                         const slashGeo = new THREE.BoxGeometry(0.2, 1, 15);
-                        const slashMat = new THREE.MeshBasicMaterial({ color: 0x880000 }); // Dark Red
+                        const slashMat = new THREE.MeshBasicMaterial({ color: 0x880000 }); 
                         const slash = new THREE.Mesh(slashGeo, slashMat);
                         slash.position.copy(player.position);
                         slash.rotation.y = player.rotation.y;
-                        // Offset the 3 slashes
                         slash.position.x += Math.cos(player.rotation.y) * (i * 2 - 2); 
                         slash.position.z -= Math.sin(player.rotation.y) * (i * 2 - 2); 
                         slash.position.y += 2;
                         scene.add(slash);
-                        
-                        // Move slash forward
                         let life = 0;
                         let moveInt = setInterval(() => {
                             slash.position.x += Math.sin(player.rotation.y) * 1.5;
@@ -288,23 +285,20 @@
                     }, i * 100);
                 }
             } else if(equippedItem === "Rumble") {
-                // Lightning Beam
                 const beamGeo = new THREE.CylinderGeometry(0.5, 0.5, 15, 8);
-                const beamMat = new THREE.MeshBasicMaterial({ color: 0x00ffff }); // Cyan
+                const beamMat = new THREE.MeshBasicMaterial({ color: 0x00ffff }); 
                 const beam = new THREE.Mesh(beamGeo, beamMat);
                 beam.position.copy(player.position);
                 beam.position.y += 2;
                 beam.rotation.x = Math.PI / 2;
                 beam.rotation.y = player.rotation.y;
-                // Move beam forward
                 beam.position.x += Math.sin(player.rotation.y) * 7.5;
                 beam.position.z += Math.cos(player.rotation.y) * 7.5;
                 scene.add(beam);
                 setTimeout(() => scene.remove(beam), 300);
             } else if(equippedItem === "Light") {
-                // Yellow Light Kick
                 const kickGeo = new THREE.SphereGeometry(2, 16, 16);
-                const kickMat = new THREE.MeshBasicMaterial({ color: 0xffff00 }); // Yellow
+                const kickMat = new THREE.MeshBasicMaterial({ color: 0xffff00 }); 
                 const kick = new THREE.Mesh(kickGeo, kickMat);
                 kick.position.copy(player.position);
                 kick.position.y += 2;
@@ -313,9 +307,8 @@
                 scene.add(kick);
                 setTimeout(() => scene.remove(kick), 300);
             } else {
-                // Combat: White Sphere blast
-                const punchGeo = new THREE.SphereGeometry(1,X }8, 8);
-                const punchMatpx = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const punchGeo = new THREE.SphereGeometry(1, 8, 8);
+                const punchMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const punch = new THREE.Mesh(punchGeo, punchMat);
                 punch.position.copy(player.position);
                 punch.position.y += 2;
@@ -325,7 +318,6 @@
                 setTimeout(() => scene.remove(punch), 200);
             }
 
-            // Cooldown timer
             setTimeout(() => { 
                 cooldowns[num] = false; 
                 btn.classList.remove('cooling');
@@ -341,9 +333,9 @@
             function updateJoystick(touch) {
                 const rect = zone.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2;
                 let deltaX = touch.clientX - centerX, deltaY = touch.clientY - centerY;
-                const maxDist = 30, dist = Math.sqrt(deltaX,*deltaX + deltaY*deltaY);
+                const maxDist = 30, dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
                 if(dist > maxDist) { deltaX = (deltaX / dist) * maxDist; deltaY = (deltaY / dist) * maxDist; }
-                knob.style.transform = `translate(${delta ${deltaY}px)`;
+                knob.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
                 moveX = deltaX / maxDist; moveZ = deltaY / maxDist; 
             }
         }
