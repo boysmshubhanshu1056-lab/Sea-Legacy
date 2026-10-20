@@ -5,56 +5,355 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sea Legacy</title>
     <style>
-        body { margin: 0; background-color: #1a1a24; font-family: sans-serif; user-select: none; }
-        #login-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 40px; border-radius: 10px; text-align: center; border: 2px solid #4a4a5a; width: 300px; }
+        body { margin: 0; overflow: hidden; background-color: #1a1a24; font-family: sans-serif; user-select: none; -webkit-user-select: none; }
+        
+        /* Login UI */
+        #login-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 40px; border-radius: 10px; text-align: center; border: 2px solid #4a4a5a; width: 300px; z-index: 10; }
         h1 { color: white; margin-top: 0; }
         input { display: block; width: 90%; padding: 10px; margin: 10px auto; border-radius: 5px; border: none; font-size: 16px; }
         button { width: 100%; padding: 15px; background: #ffcc00; border: none; border-radius: 5px; font-weight: bold; font-size: 18px; cursor: pointer; }
-        #game-world { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #87CEEB; }
+        
+        /* Game UI */
+        #game-ui { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         #hud { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0 #000; }
-        #chat-box { position: absolute; bottom: 20px; left: 20px; }
-        #chat-input { width: 300px; padding: 12px; border-radius: 20px; border: 2px solid #555; background: rgba(0,0,0,0.7); color: white; font-size: 16px; }
+        
+        /* Top Right Buttons */
+        #top-buttons { position: absolute; top: 20px; right: 20px; pointer-events: auto; display: flex; gap: 10px; }
+        .menu-btn { background: rgba(0,0,0,0.6); border: 2px solid white; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 18px; cursor: pointer; }
+
+        /* Joystick */
+        #joystick-zone { position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); pointer-events: auto; }
+        #joystick-knob { position: absolute; top: 30px; left: 30px; width: 60px; height: 60px; background: rgba(255,255,255,0.8); border-radius: 50%; }
+
+        /* Skill Buttons */
+        #skill-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); pointer-events: auto; display: flex; gap: 10px; }
+        .skill-btn { width: 60px; height: 60px; background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 10px; color: white; font-weight: bold; text-align: center; line-height: 60px; font-size: 20px; transition: 0.2s; }
+        .skill-btn.cooling { background: rgba(50,50,50,0.9); color: #888; border-color: #555; }
+        .skill-btn:active:not(.cooling) { background: rgba(255,255,255,0.4); }
+
+        /* Chat */
+        #chat-box { position: absolute; bottom: 20px; left: 200px; pointer-events: auto; }
+        #chat-input { width: 200px; padding: 12px; border-radius: 20px; border: 2px solid #555; background: rgba(0,0,0,0.7); color: white; font-size: 16px; }
+
+        /* Shop & Inventory Modals */
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,30,0.95); border: 2px solid #ffcc00; padding: 20px; border-radius: 10px; width: 400px; pointer-events: auto; z-index: 20; color: white; max-height: 80vh; overflow-y: auto; }
+        .modal h2 { margin-top: 0; text-align: center; color: #ffcc00; }
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; align-items: center;}
+        .buy-btn { background: #00ff00; color: black; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .buy-btn:disabled { background: grey; color: darkgrey; cursor: not-allowed; }
+        .close-btn { background: red; color: white; border: none; padding: 10px; width: 100%; margin-top: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
+
     <div id="login-box">
         <h1>SEA LEGACY</h1>
-        <input type="text" id="username" placeholder="Username (Type Prince)">
+        <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">LOGIN</button>
+        <button onclick="login()">LOGIN / REGISTER</button>
     </div>
 
-    <div id="game-world">
+    <div id="game-ui">
         <div id="hud">
             <div>Lv. <span id="level">1</span></div>
             <div>Beli: $<span id="money">0</span></div>
+            <div>Equipped: <span id="equipped-text">Combat</span></div>
         </div>
+
+        <div id="top-buttons">
+            <button class="menu-btn" onclick="openShop()">SHOP</button>
+            <button class="menu-btn" onclick="openInventory()">BAG</button>
+            <button class="menu-btn" onclick="toggleSea()">SEA 1</button>
+        </div>
+        
+        <div id="joystick-zone">
+            <div id="joystick-knob"></div>
+        </div>
+
+        <div id="skill-bar">
+            <div class="skill-btn" id="skill-1" onclick="useSkill(1)">1</div>
+            <div class="skill-btn" id="skill-2" onclick="useSkill(2)">2</div>
+            <div class="skill-btn" id="skill-3" onclick="useSkill(3)">3</div>
+            <div class="skill-btn" id="skill-4" onclick="useSkill(4)">4</div>
+        </div>
+
         <div id="chat-box">
             <input type="text" id="chat-input" placeholder="Type /lvl 2450..." onkeypress="handleChat(event)">
         </div>
     </div>
 
+    <!-- SHOP MODAL -->
+    <div id="shop-modal" class="modal">
+        <h2>Shop</h2>
+        <div class="item-row"><span>Rumble Fruit ($60,000)</span><button class="buy-btn" id="btn-Rumble" onclick="buyItem('Rumble', 60000)">BUY</button></div>
+        <div class="item-row"><span>Portal Fruit ($60,000)</span><button class="buy-btn" id="btn-Portal" onclick="buyItem('Portal', 60000)">BUY</button></div>
+        <div class="item-row"><span>Light Fruit ($60,000)</span><button class="buy-btn" id="btn-Light" onclick="buyItem('Light', 60000)">BUY</button></div>
+        <div class="item-row"><span>Superhuman ($50,000)</span><button class="buy-btn" id="btn-Superhuman" onclick="buyItem('Superhuman', 50000)">BUY</button></div>
+        <div class="item-row"><span>Death Step ($50,000)</span><button class="buy-btn" id="btn-DeathStep" onclick="buyItem('Death Step', 50000)">BUY</button></div>
+        <div class="item-row"><span>Yoru Sword ($100,000)</span><button class="buy-btn" id="btn-Yoru" onclick="buyItem('Yoru', 100000)">BUY</button></div>
+        <button class="close-btn" onclick="closeModals()">CLOSE</button>
+    </div>
+
+    <!-- INVENTORY MODAL -->
+    <div id="bag-modal" class="modal">
+        <h2>Inventory</h2>
+        <div id="inventory-list"></div>
+        <button class="close-btn" onclick="closeModals()">CLOSE</button>
+    </div>
+
     <script>
+        let scene, camera, renderer, player, ground;
+        let isGameRunning = false;
+        let currentLevel = 1, currentSea = 1, isAdmin = false, currentUser = "";
+        let currentMoney = 0;
+        let inventory = ["Combat"]; 
+        let equippedItem = "Combat";
+        let cooldowns = {1: false, 2: false, 3: false, 4: false};
+
+        let moveX = 0, moveZ = 0, baseSpeed = 0.3, currentSpeed = 0.3;
+
+        function getAccounts() { return JSON.parse(localStorage.getItem('seaLegacyAccounts')) || {}; }
+        function saveAccounts(accounts) { localStorage.setItem('seaLegacyAccounts', JSON.stringify(accounts)); }
+
         function login() {
-            const user = document.getElementById('username').value;
-            if(user === "") return alert("Enter a name!");
-            document.getElementById('login-box').style.display = 'none';
-            document.getElementById('game-world').style.display = 'block';
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            if(user === "" || pass === "") return alert("Enter username and password.");
+
+            let accounts = getAccounts();
+
             if(user.toLowerCase() === "prince") {
-                document.getElementById('level').innerText = "2450 (ADMIN)";
-                document.getElementById('money').innerText = "99,999,999";
+                if(accounts["Prince"] && accounts["Prince"].password !== pass) return alert("Wrong password.");
+                accounts["Prince"] = { password: pass, level: 2450, money: 99999999 };
+                saveAccounts(accounts);
+                isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
+                if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru"); // ADMIN EXCLUSIVE
+            } else {
+                if(accounts[user]) {
+                    if(accounts[user].password !== pass) return alert("Wrong password.");
+                    isAdmin = false; currentLevel = accounts[user].level; currentMoney = accounts[user].money;
+                } else {
+                    accounts[user] = { password: pass, level: 1, money: 0 };
+                    saveAccounts(accounts);
+                    isAdmin = false; currentLevel = 1; currentMoney = 0;
+                }
+            }
+
+            currentUser = user;
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'block';
+            updateUI();
+            startGame();
+            setupJoystick();
+        }
+
+        function updateUI() {
+            document.getElementById('level').innerText = currentLevel + (isAdmin ? " (ADMIN)" : "");
+            document.getElementById('money').innerText = currentMoney.toLocaleString();
+            document.getElementById('equipped-text').innerText = equippedItem;
+            
+            const itemsToBuy = ['Rumble', 'Portal', 'Light', 'Superhuman', 'Death Step', 'Yoru'];
+            itemsToBuy.forEach(item => {
+                let btn = document.getElementById('btn-' + item.replace(" ", ""));
+                if(btn) btn.disabled = currentMoney < parseInt(btn.getAttribute('onclick').split(',')[1]) || inventory.includes(item);
+            });
+        }
+
+        function openShop() { document.getElementById('shop-modal').style.display = 'block'; updateUI(); }
+        function openInventory() {
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = "";
+            inventory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item-row';
+                div.innerHTML = `<span>${item}</span> <button class="buy-btn" onclick="equipItem('${item}')">EQUIP</button>`;
+                list.appendChild(div);
+            });
+            document.getElementById('bag-modal').style.display = 'block';
+        }
+        function closeModals() { document.getElementById('shop-modal').style.display = 'none'; document.getElementById('bag-modal').style.display = 'none'; }
+
+        function buyItem(itemName, price) {
+            if(currentMoney >= price && !inventory.includes(itemName)) {
+                currentMoney -= price;
+                inventory.push(itemName);
+                alert(`Bought ${itemName}!`);
+                updateUI();
             }
         }
+
+        function equipItem(item) {
+            equippedItem = item;
+            updateUI();
+            closeModals();
+        }
+
         function handleChat(e) {
             if (e.key === 'Enter') {
                 const val = e.target.value;
                 e.target.value = "";
-                if(val.startsWith("/lvl ")) {
-                    const newLvl = val.split(" ")[1];
-                    document.getElementById('level').innerText = newLvl + " (ADMIN)";
-                }
+                if(!isAdmin) return alert("Not an admin!");
+                
+                if(val.startsWith("/lvl ")) { currentLevel = parseInt(val.split(" ")[1]); updateUI(); }
+                else if(val === "/g") { currentMoney = 99999999; updateUI(); }
+                else if(val.startsWith("/tp ")) { /* Logic for teleporting to players later */ }
+                else if(val === "/br") { player.position.set(0, 2, 0); }
             }
         }
+
+        function toggleSea() {
+            if(currentLevel < 1225) return alert("Need Level 1225!");
+            currentSea = currentSea === 1 ? 2 : 1;
+            document.querySelectorAll('.menu-btn')[2].innerText = "SEA " + currentSea;
+            if(currentSea === 1) { ground.material.color.setHex(0x8b5a2b); scene.background.setHex(0x87CEEB); }
+            else { ground.material.color.setHex(0xffffff); scene.background.setHex(0x445566); }
+        }
+
+        function startGame() {
+            if(isGameRunning) return;
+            isGameRunning = true;
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(10, 20, 10); scene.add(dirLight);
+
+            const groundGeo = new THREE.BoxGeometry(100, 2, 100);
+            const groundMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b });
+            ground = new THREE.Mesh(groundGeo, groundMat); ground.position.y = -1; scene.add(ground);
+
+            player = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), new THREE.MeshLambertMaterial({ color: 0x111111 })); body.position.y = 1.5; player.add(body);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshLambertMaterial({ color: 0xffcc99 })); head.position.y = 3.6; player.add(head);
+            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x111111 })); leftLeg.position.set(-0.5, 0, 0); player.add(leftLeg);
+            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x111111 })); rightLeg.position.set(0.5, 0, 0); player.add(rightLeg);
+            const leftWing = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 1.5), new THREE.MeshLambertMaterial({ color: 0xffffff })); leftWing.position.set(-1.2, 2, -0.5); leftWing.rotation.z = 0.3; player.add(leftWing);
+            const rightWing = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 1.5), new THREE.MeshLambertMaterial({ color: 0xffffff })); rightWing.position.set(1.2, 2, -0.5); rightWing.rotation.z = -0.3; player.add(rightWing);
+            scene.add(player);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(player) {
+                player.position.x += moveX * currentSpeed;
+                player.position.z += moveZ * currentSpeed;
+                if (moveX !== 0 || moveZ !== 0) player.rotation.y = Math.atan2(moveX, moveZ);
+                camera.position.x = player.position.x;
+                camera.position.y = player.position.y + 12;
+                camera.position.z = player.position.z + 18;
+                camera.lookAt(player.position.x, player.position.y + 2, player.position.z);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // --- BLOX FRUITS STYLE MOVES ---
+        function useSkill(num) {
+            if(cooldowns[num]) return;
+
+            const btn = document.getElementById('skill-' + num);
+            cooldowns[num] = true;
+            btn.classList.add('cooling');
+
+            if(equippedItem === "True Triple Yoru") {
+                // Three massive slashes
+                for(let i=0; i<3; i++) {
+                    setTimeout(() => {
+                        const slashGeo = new THREE.BoxGeometry(0.2, 1, 15);
+                        const slashMat = new THREE.MeshBasicMaterial({ color: 0x880000 }); // Dark Red
+                        const slash = new THREE.Mesh(slashGeo, slashMat);
+                        slash.position.copy(player.position);
+                        slash.rotation.y = player.rotation.y;
+                        // Offset the 3 slashes
+                        slash.position.x += Math.cos(player.rotation.y) * (i * 2 - 2); 
+                        slash.position.z -= Math.sin(player.rotation.y) * (i * 2 - 2); 
+                        slash.position.y += 2;
+                        scene.add(slash);
+                        
+                        // Move slash forward
+                        let life = 0;
+                        let moveInt = setInterval(() => {
+                            slash.position.x += Math.sin(player.rotation.y) * 1.5;
+                            slash.position.z += Math.cos(player.rotation.y) * 1.5;
+                            life += 1;
+                            if(life > 10) { clearInterval(moveInt); scene.remove(slash); }
+                        }, 30);
+                    }, i * 100);
+                }
+            } else if(equippedItem === "Rumble") {
+                // Lightning Beam
+                const beamGeo = new THREE.CylinderGeometry(0.5, 0.5, 15, 8);
+                const beamMat = new THREE.MeshBasicMaterial({ color: 0x00ffff }); // Cyan
+                const beam = new THREE.Mesh(beamGeo, beamMat);
+                beam.position.copy(player.position);
+                beam.position.y += 2;
+                beam.rotation.x = Math.PI / 2;
+                beam.rotation.y = player.rotation.y;
+                // Move beam forward
+                beam.position.x += Math.sin(player.rotation.y) * 7.5;
+                beam.position.z += Math.cos(player.rotation.y) * 7.5;
+                scene.add(beam);
+                setTimeout(() => scene.remove(beam), 300);
+            } else if(equippedItem === "Light") {
+                // Yellow Light Kick
+                const kickGeo = new THREE.SphereGeometry(2, 16, 16);
+                const kickMat = new THREE.MeshBasicMaterial({ color: 0xffff00 }); // Yellow
+                const kick = new THREE.Mesh(kickGeo, kickMat);
+                kick.position.copy(player.position);
+                kick.position.y += 2;
+                kick.position.x += Math.sin(player.rotation.y) * 4;
+                kick.position.z += Math.cos(player.rotation.y) * 4;
+                scene.add(kick);
+                setTimeout(() => scene.remove(kick), 300);
+            } else {
+                // Combat: White Sphere blast
+                const punchGeo = new THREE.SphereGeometry(1,X }8, 8);
+                const punchMatpx = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const punch = new THREE.Mesh(punchGeo, punchMat);
+                punch.position.copy(player.position);
+                punch.position.y += 2;
+                punch.position.x += Math.sin(player.rotation.y) * 3;
+                punch.position.z += Math.cos(player.rotation.y) * 3;
+                scene.add(punch);
+                setTimeout(() => scene.remove(punch), 200);
+            }
+
+            // Cooldown timer
+            setTimeout(() => { 
+                cooldowns[num] = false; 
+                btn.classList.remove('cooling');
+            }, 1500); 
+        }
+
+        function setupJoystick() {
+            const zone = document.getElementById('joystick-zone'), knob = document.getElementById('joystick-knob');
+            let isDragging = false;
+            zone.addEventListener('touchstart', (e) => { isDragging = true; updateJoystick(e.touches[0]); });
+            zone.addEventListener('touchmove', (e) => { if(isDragging) updateJoystick(e.touches[0]); });
+            zone.addEventListener('touchend', () => { isDragging = false; moveX = 0; moveZ = 0; knob.style.transform = `translate(0px, 0px)`; });
+            function updateJoystick(touch) {
+                const rect = zone.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2;
+                let deltaX = touch.clientX - centerX, deltaY = touch.clientY - centerY;
+                const maxDist = 30, dist = Math.sqrt(deltaX,*deltaX + deltaY*deltaY);
+                if(dist > maxDist) { deltaX = (deltaX / dist) * maxDist; deltaY = (deltaY / dist) * maxDist; }
+                knob.style.transform = `translate(${delta ${deltaY}px)`;
+                moveX = deltaX / maxDist; moveZ = deltaY / maxDist; 
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if(e.key === '1') useSkill(1);
+            if(e.key === '2') useSkill(2);
+            if(e.key === '3') useSkill(3);
+            if(e.key === '4') useSkill(4);
+        });
     </script>
 </body>
 </html>
