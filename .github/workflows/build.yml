@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest # Going back to Mac so we can make the .ipa
+    runs-on: ubuntu-latest # Linux server (no memory crashes)
     
     steps:
       - name: Checkout Code
@@ -19,21 +19,46 @@ jobs:
           version: 4.2.1
           use-dotnet: false
 
-      - name: Download Export Templates
-        run: |
-          wget https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          mkdir -p ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable
-          tar -xvzf Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* ~/Library/Application\ Support/Godot/export_templates/4.2.1.stable/
-
-      - name: Export iOS App
+      - name: Export Game Data
         run: |
           mkdir -p build
-          # This bypasses the editor and exports directly to the iOS wrapper
-          godot --headless --export-release "iOS" build/SeaLegacy.ipa
+          godot --headless --export-release "iOS" build/Sea_Legacy.pck
+
+      - name: Create iOS App Folder Structure
+        run: |
+          mkdir -p build/Payload/Sea_Legacy.app
+          cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
+          
+          cat << 'EOF' > build/Payload/Sea_Legacy.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleDisplayName</key>
+            <string>Sea Legacy</string>
+            <key>CFBundleExecutable</key>
+            <string>Sea_Legacy</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.prince.sealegacy</string>
+            <key>CFBundleName</key>
+            <string>Sea Legacy</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0</string>
+            <key>CFBundleVersion</key>
+            <string>1.0</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Zip into .ipa
+        run: |
+          cd build
+          zip -r SeaLegacy.ipa Payload/
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: SeaLegacy-iOS
-          path: build/*.ipa
+          path: build/SeaLegacy.ipa
