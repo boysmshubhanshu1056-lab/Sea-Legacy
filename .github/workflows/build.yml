@@ -7,62 +7,43 @@ on:
 
 jobs:
   build-ios:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest # Mac is required for iOS compilation
     
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Download Godot & Templates
-        run: |
-          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
-          unzip -q Godot_v4.2.1-stable_linux.x86_64.zip
-          chmod +x Godot_v4.2.1-stable_linux.x86_64
-          
-          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          
-          # Using absolute paths to avoid bash expansion bugs
-          mkdir -p /home/runner/.local/share/godot/export_templates/4.2.1.stable
-          unzip -q Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* /home/runner/.local/share/godot/export_templates/4.2.1.stable/
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.2.1
+          use-dotnet: false
 
-      - name: Import and Export Game Data
+      - name: Download iOS Template
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          # The iOS template is a zip inside the templates folder
+          unzip -q templates/ios.zip -d ios_template
+
+      - name: Export Game Data (PCK)
         run: |
           mkdir -p build
-          # Export the game data
-          ./Godot_v4.2.1-stable_linux.x86_64 --headless --export-release "Linux" build/Sea_Legacy.pck
-          
-          echo "--- CHECKING BUILD FOLDER ---"
-          ls -la build/
-          echo "-----------------------------"
+          # Export the data safely on Mac
+          godot --headless --export-release "Linux" build/Sea_Legacy.pck
 
-      - name: Create iOS App Folder Structure
+      - name: Inject Game into iOS App
         run: |
-          mkdir -p build/Payload/Sea_Legacy.app
-          cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
+          # Copy the pre-compiled app structure
+          cp -r ios_template/* build/Payload/
+          # Rename the default app folder to our app name
+          mv build/Payload/Godot.app build/Payload/Sea_Legacy.app
           
-          cat << 'EOF' > build/Payload/Sea_Legacy.app/Info.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple1//DTD PLIST .0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>CFBundleDisplayName</key>
-            <string>Sea Legacy</string>
-            <key>CFBundleExecutable</key>
-            <string>Sea_Legacy</string>
-            <key>CFBundleIdentifier</key>
-            <string>com.prince.sealegacy</string>
-            <key>CFBundleName</key>
-            <string>Sea Legacy</string>
-            <key>CFBundlePackageType</key>
-            <string>APPL</string>
-            <key>CFBundleShortVersionString</key>
-            <string>1.0</string>
-            <key>CFBundleVersion</key>
-            <string>1.0</string>
-          </dict>
-          </plist>
-          EOF
+          # Rename the executable inside the app
+          mv build/Payload/Sea_Legacy.app/Godot build/Payload/Sea_Legacy.app/Sea_Legacy
+          
+          # Inject our game data
+          cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
 
       - name: Zip into .ipa
         run: |
