@@ -20,13 +20,14 @@ jobs:
       - name: Install Capacitor
         run: |
           npm install
-          npx cap init "Sea Legacy" "com.prince.sealegacy" --web-dir="."
           npx cap add ios
+
+      - name: Sync Web Files
+        run: npx cap sync ios
 
       - name: Build iOS (Unsigned for LiveContainer)
         run: |
           cd ios/App
-          # Compile the app using Apple's Xcode without signatures
           xcodebuild build -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           
           mkdir -p ../../build/Payload
@@ -57,11 +58,16 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Capacitor & Build Android
+      - name: Install Capacitor
         run: |
           npm install
-          npx cap init "Sea Legacy" "com.prince.sealegacy" --web-dir="."
           npx cap add android
+
+      - name: Sync Web Files
+        run: npx cap sync android
+
+      - name: Build Android APK
+        run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
