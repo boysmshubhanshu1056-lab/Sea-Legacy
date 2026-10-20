@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: ubuntu-latest # The strong server that never crashes
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
@@ -36,22 +36,35 @@ jobs:
           # 1. Extract the pre-compiled iOS App template
           unzip -q /home/runner/.local/share/godot/export_templates/4.2.1.stable/ios.zip -d ios_template
           
-          # 2. Create the Apple Payload folder structure
+          # 2. Find the .app folder (in case it's named Godot_iOS.app or something else)
+          APP_FOLDER=$(find ios_template -maxdepth 2 -name "*.app" | head -n 1)
+          echo "Found app folder: $APP_FOLDER"
+          
+          # 3. Create the Apple Payload folder structure
           mkdir -p build/Payload
           
-          # 3. Move the app template into Payload
-          mv ios_template/Godot.app build/Payload/Sea_Legacy.app
+          # 4. Move and rename it to Sea_Legacy.app
+          mv "$APP_FOLDER" build/Payload/Sea_Legacy.app
           
-          # 4. Rename the executable so LiveContainer recognizes it
-          mv build/Payload/Sea_Legacy.app/Godot build/Payload/Sea_Legacy.app/Sea_Legacy
-          
-          # 5. Inject your game data into the app
+          # 5. Rename the executable inside it (usually named Godot or Godot_iOS)
+          cd build/Payload/Sea_Legacy.app
+          EXEC_NAME=$(defaults read "$PWD/Info.plist" CFBundleExecutable 2>/dev/null || echo "Godot")
+          if [ -f "$EXEC_NAME" ]; then
+            mv "$EXEC_NAME" Sea_Legacy
+          elif [ -f "Godot" ]; then
+            mv Godot Sea_Legacy
+          elif [ -f "Godot_iOS" ]; then
+            mv Godot_iOS Sea_Legacy
+          fi
+          cd ../../..
+
+          # 6. Inject your game data
           cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
           
-          # 6. Update Info.plist with your app name
-          sed -i '' 's/<string>Godot<\/string>/<string>Sea Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
-          sed -i '' 's/<string>org.godotengine.godot<\/string>/<string>com.prince.sealegacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
-          sed -i '' 's/<string>Godot<\/string>/<string>Sea_Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist || true
+          # 7. Update Info.plist (Linux syntax)
+          sed -i 's/<string>Godot<\/string>/<string>Sea Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
+          sed -i 's/<string>org.godotengine.godot<\/string>/<string>com.prince.sealegacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
+          sed -i 's/<string>Godot_iOS<\/string>/<string>Sea_Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist || true
 
       - name: Zip into .ipa
         run: |
