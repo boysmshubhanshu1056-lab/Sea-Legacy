@@ -19,17 +19,20 @@ jobs:
           version: 4.2.1
           use-dotnet: false
 
+      # This action automatically downloads templates, imports, and exports safely
       - name: Export Game Data (Linux PCK)
-        run: |
-          mkdir -p build
-          # We export for Linux because it works perfectly on Ubuntu
-          godot --headless --export-release "Linux" build/Sea_Legacy.pck
-          ls -la build/ # This will print the file so we can see it exists
+        uses: firebelley/godot-export@v5.2.0
+        with:
+          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          relative_project_path: ./
+          archive_output: false
 
       - name: Create iOS App Folder Structure
         run: |
           mkdir -p build/Payload/Sea_Legacy.app
-          cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
+          # The export action puts the file in build/Linux/Sea_Legacy.pck
+          cp build/Linux/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
           
           cat << 'EOF' > build/Payload/Sea_Legacy.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
