@@ -1,0 +1,8 @@
+{
+  "appId": "com.prince.sealegacy",
+  "appName": "Sea Legacy",
+  "webDir": "www",
+  "server": {
+    "cleartext": true
+  }
+}
