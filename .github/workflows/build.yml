@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
@@ -19,19 +19,13 @@ jobs:
           version: 4.2.1
           use-dotnet: false
 
-      # The custom download step is removed. 
-      # The export action below handles templates automatically.
+      - name: Import Project & Create Data Pack
+        run: |
+          mkdir -p build
+          godot --headless --export-release "iOS" build/Sea_Legacy.pck
 
-      - name: Export iOS
-        uses: firebelley/godot-export@v5.2.0
-        with:
-          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_macos.universal.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          relative_project_path: ./
-          archive_output: true
-
-      - name: Upload IPA Artifact
+      - name: Upload iOS App
         uses: actions/upload-artifact@v4
         with:
-          name: SeaLegacy-iOS
-          path: build/*.ipa
+          name: SeaLegacy-iOS-Build
+          path: build/
