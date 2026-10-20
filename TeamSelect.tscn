@@ -38,10 +38,8 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "PIRATES"
-pressed.connect("_on_pirate_btn_pressed")
 
 [node name="MarineBtn" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "MARINES"
-pressed.connect("_on_marine_btn_pressed")
