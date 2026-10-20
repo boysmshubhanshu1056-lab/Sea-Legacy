@@ -8,35 +8,41 @@
         body { margin: 0; overflow: hidden; background-color: #1a1a24; font-family: sans-serif; user-select: none; -webkit-user-select: none; }
         
         /* Login UI */
-        #login-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 40px; border-radius: 10px; text-align: center; border: 2px solid #4a4a5a; width: 300px; z-index: 10; }
+        #login-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 40px; border-radius: 10px; text-align: center; border: 2px solid #4a4a5a; width: 300px; z-index: 10; }
         h1 { color: white; margin-top: 0; }
         input { display: block; width: 90%; padding: 10px; margin: 10px auto; border-radius: 5px; border: none; font-size: 16px; }
         button { width: 100%; padding: 15px; background: #ffcc00; border: none; border-radius: 5px; font-weight: bold; font-size: 18px; cursor: pointer; }
         
         /* Game UI */
         #game-ui { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        #hud { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0 #000; }
         
+        /* Top Left HUD & Chat */
+        #top-left-ui { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; }
+        #hud { color: white; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 #000; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 5px; }
+        #chat-log { color: white; font-size: 14px; text-shadow: 1px 1px 0 #000; max-height: 150px; overflow-y: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        #chat-input { width: 300px; padding: 10px; border-radius: 5px; border: 1px solid #555; background: rgba(0,0,0,0.6); color: white; font-size: 14px; pointer-events: auto; margin-top: 5px; outline: none; }
+
         /* Top Right Buttons */
         #top-buttons { position: absolute; top: 20px; right: 20px; pointer-events: auto; display: flex; gap: 10px; }
-        .menu-btn { background: rgba(0,0,0,0.6); border: 2px solid white; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .menu-btn { background: rgba(0,0,0,0.6); border: 2px solid white; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
         /* Joystick */
         #joystick-zone { position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); pointer-events: auto; }
         #joystick-knob { position: absolute; top: 30px; left: 30px; width: 60px; height: 60px; background: rgba(255,255,255,0.8); border-radius: 50%; }
 
-        /* Skill Buttons */
-        #skill-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); pointer-events: auto; display: flex; gap: 10px; }
-        .skill-btn { width: 60px; height: 60px; background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 10px; color: white; font-weight: bold; text-align: center; line-height: 60px; font-size: 20px; transition: 0.2s; }
-        .skill-btn.cooling { background: rgba(50,50,50,0.9); color: #888; border-color: #555; }
-        .skill-btn:active:not(.cooling) { background: rgba(255,255,255,0.4); }
+        /* Right Side Buttons */
+        #right-controls { position: absolute; bottom: 50px; right: 30px; display: flex; flex-direction: column; align-items: flex-end; gap: 15px; pointer-events: auto; }
+        
+        .action-btn { width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 2px solid white; border-radius: 50%; color: white; font-weight: bold; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+        .action-btn:active { background: rgba(255,255,255,0.3); }
 
-        /* Chat */
-        #chat-box { position: absolute; bottom: 20px; left: 200px; pointer-events: auto; }
-        #chat-input { width: 200px; padding: 12px; border-radius: 20px; border: 2px solid #555; background: rgba(0,0,0,0.7); color: white; font-size: 16px; }
+        #skill-bar { display: flex; gap: 10px; margin-top: 10px; }
+        .skill-btn { width: 60px; height: 60px; background: rgba(0,0,0,0.8); border: 2px solid #ffcc00; border-radius: 10px; color: white; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; text-align: center; }
+        .skill-btn.cooling { border-color: #555; color: #888; background: rgba(20,20,20,0.9); }
+        .skill-btn span { font-size: 18px; font-weight: 900; margin-bottom: 2px;}
 
-        /* Shop & Inventory Modals */
-        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,30,0.95); border: 2px solid #ffcc00; padding: 20px; border-radius: 10px; width: 400px; pointer-events: auto; z-index: 20; color: white; max-height: 80vh; overflow-y: auto; }
+        /* Modals */
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,30,0.95); border: 2px solid #ffcc00; padding: 20px; border-radius: 10px; width: 350px; pointer-events: auto; z-index: 20; color: white; max-height: 80vh; overflow-y: auto; }
         .modal h2 { margin-top: 0; text-align: center; color: #ffcc00; }
         .item-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; align-items: center;}
         .buy-btn { background: #00ff00; color: black; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
@@ -55,10 +61,14 @@
     </div>
 
     <div id="game-ui">
-        <div id="hud">
-            <div>Lv. <span id="level">1</span></div>
-            <div>Beli: $<span id="money">0</span></div>
-            <div>Equipped: <span id="equipped-text">Combat</span></div>
+        <div id="top-left-ui">
+            <div id="hud">
+                <div>Lv. <span id="level">1</span></div>
+                <div>Beli: $<span id="money">0</span></div>
+                <div>Equipped: <span id="equipped-text">Combat</span></div>
+            </div>
+            <div id="chat-log"></div>
+            <input type="text" id="chat-input" placeholder="Chat or command..." onkeypress="handleChat(event)">
         </div>
 
         <div id="top-buttons">
@@ -71,26 +81,26 @@
             <div id="joystick-knob"></div>
         </div>
 
-        <div id="skill-bar">
-            <div class="skill-btn" id="skill-1" onclick="useSkill(1)">1</div>
-            <div class="skill-btn" id="skill-2" onclick="useSkill(2)">2</div>
-            <div class="skill-btn" id="skill-3" onclick="useSkill(3)">3</div>
-            <div class="skill-btn" id="skill-4" onclick="useSkill(4)">4</div>
-        </div>
-
-        <div id="chat-box">
-            <input type="text" id="chat-input" placeholder="Type /lvl 2450..." onkeypress="handleChat(event)">
+        <div id="right-controls">
+            <button class="action-btn" onclick="jump()">JUMP</button>
+            <button class="action-btn" onclick="dash()">DASH</button>
+            <div id="skill-bar">
+                <div class="skill-btn" id="skill-1" onclick="useSkill(1)"><span>1</span>Move</div>
+                <div class="skill-btn" id="skill-2" onclick="useSkill(2)"><span>2</span>Move</div>
+                <div class="skill-btn" id="skill-3" onclick="useSkill(3)"><span>3</span>Move</div>
+                <div class="skill-btn" id="skill-4" onclick="useSkill(4)"><span>4</span>Move</div>
+            </div>
         </div>
     </div>
 
     <div id="shop-modal" class="modal">
         <h2>Shop</h2>
-        <div class="item-row"><span>Rumble Fruit ($60,000)</span><button class="buy-btn" id="btn-Rumble" onclick="buyItem('Rumble', 60000)">BUY</button></div>
-        <div class="item-row"><span>Portal Fruit ($60,000)</span><button class="buy-btn" id="btn-Portal" onclick="buyItem('Portal', 60000)">BUY</button></div>
-        <div class="item-row"><span>Light Fruit ($60,000)</span><button class="buy-btn" id="btn-Light" onclick="buyItem('Light', 60000)">BUY</button></div>
-        <div class="item-row"><span>Superhuman ($50,000)</span><button class="buy-btn" id="btn-Superhuman" onclick="buyItem('Superhuman', 50000)">BUY</button></div>
-        <div class="item-row"><span>Death Step ($50,000)</span><button class="buy-btn" id="btn-DeathStep" onclick="buyItem('Death Step', 50000)">BUY</button></div>
-        <div class="item-row"><span>Yoru Sword ($100,000)</span><button class="buy-btn" id="btn-Yoru" onclick="buyItem('Yoru', 100000)">BUY</button></div>
+        <div class="item-row"><span>Rumble ($60k)</span><button class="buy-btn" id="btn-Rumble" onclick="buyItem('Rumble', 60000)">BUY</button></div>
+        <div class="item-row"><span>Portal ($60k)</span><button class="buy-btn" id="btn-Portal" onclick="buyItem('Portal', 60000)">BUY</button></div>
+        <div class="item-row"><span>Light ($60k)</span><button class="buy-btn" id="btn-Light" onclick="buyItem('Light', 60000)">BUY</button></div>
+        <div class="item-row"><span>Superhuman ($50k)</span><button class="buy-btn" id="btn-Superhuman" onclick="buyItem('Superhuman', 50000)">BUY</button></div>
+        <div class="item-row"><span>Death Step ($50k)</span><button class="buy-btn" id="btn-DeathStep" onclick="buyItem('Death Step', 50000)">BUY</button></div>
+        <div class="item-row"><span>Yoru ($100k)</span><button class="buy-btn" id="btn-Yoru" onclick="buyItem('Yoru', 100000)">BUY</button></div>
         <button class="close-btn" onclick="closeModals()">CLOSE</button>
     </div>
 
@@ -101,38 +111,59 @@
     </div>
 
     <script>
-        // --- SECURE ADMIN SETTINGS ---
         const ADMIN_USER = "prince";
         const ADMIN_PASS = "lakshyaiskingofallpiratesandbitches";
 
-        let scene, camera, renderer, player, ground;
+        let scene, camera, renderer, player, ground, npc;
         let isGameRunning = false;
         let currentLevel = 1, currentSea = 1, isAdmin = false, currentUser = "";
         let currentMoney = 0;
         let inventory = ["Combat"]; 
         let equippedItem = "Combat";
         let cooldowns = {1: false, 2: false, 3: false, 4: false};
-        let moveX = 0, moveZ = 0, baseSpeed = 0.3, currentSpeed = 0.3;
+        
+        let moveX = 0, moveZ = 0, baseSpeed = 0.25, currentSpeed = 0.25;
+        let velocityY = 0, gravity = -0.02, isGrounded = true;
 
         function getAccounts() { return JSON.parse(localStorage.getItem('seaLegacyAccounts')) || {}; }
         function saveAccounts(accounts) { localStorage.setItem('seaLegacyAccounts', JSON.stringify(accounts)); }
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('lastLoggedInUser');
+            if (savedUser) {
+                const pass = localStorage.getItem('lastLoggedInPass');
+                autoLogin(savedUser, pass);
+            }
+        };
+
+        function autoLogin(user, pass) {
+            if(user.toLowerCase() === ADMIN_USER && pass === ADMIN_PASS) {
+                isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
+                if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru");
+            } else {
+                let accounts = getAccounts();
+                if(accounts[user] && accounts[user].password === pass) {
+                    currentLevel = accounts[user].level; currentMoney = accounts[user].money;
+                } else return; 
+            }
+            currentUser = user;
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'block';
+            updateUI();
+            startGame();
+            setupJoystick();
+        }
 
         function login() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
             if(user === "" || pass === "") return alert("Enter username and password.");
 
-            // 1. Admin Login Check
             if(user.toLowerCase() === ADMIN_USER) {
-                if(pass === ADMIN_PASS) {
-                    isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
-                    if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru"); 
-                } else {
-                    return alert("Wrong password for this user.");
-                }
-            } 
-            // 2. Normal Player Login / Register
-            else {
+                if(pass !== ADMIN_PASS) return alert("Wrong password for this user.");
+                isAdmin = true; currentLevel = 2450; currentMoney = 99999999;
+                if(!inventory.includes("True Triple Yoru")) inventory.push("True Triple Yoru"); 
+            } else {
                 let accounts = getAccounts();
                 if(accounts[user]) {
                     if(accounts[user].password !== pass) return alert("Wrong password.");
@@ -144,6 +175,9 @@
                 }
             }
 
+            localStorage.setItem('lastLoggedInUser', user);
+            localStorage.setItem('lastLoggedInPass', pass);
+
             currentUser = user;
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('game-ui').style.display = 'block';
@@ -152,11 +186,30 @@
             setupJoystick();
         }
 
+        function addChat(text) {
+            const log = document.getElementById('chat-log');
+            const msg = document.createElement('div');
+            msg.innerText = text;
+            log.appendChild(msg);
+            if(log.childNodes.length > 5) log.removeChild(log.firstChild);
+        }
+
         function updateUI() {
             document.getElementById('level').innerText = currentLevel + (isAdmin ? " (ADMIN)" : "");
             document.getElementById('money').innerText = currentMoney.toLocaleString();
             document.getElementById('equipped-text').innerText = equippedItem;
             
+            const skillNames = {
+                "True Triple Yoru": ["Slash 1", "Slash 2", "Slash 3", "Slash 4"],
+                "Rumble": ["Lightning", "Thunder", "Strike", "Burst"],
+                "Light": ["Kick", "Beam", "Flash", "Speed"],
+                "Combat": ["Punch", "Kick", "Slam", "Blast"]
+            };
+            const names = skillNames[equippedItem] || ["Move1", "Move2", "Move3", "Move4"];
+            for(let i=1; i<=4; i++) {
+                document.getElementById('skill-'+i).innerHTML = `<span>${i}</span>${names[i-1]}`;
+            }
+
             const itemsToBuy = ['Rumble', 'Portal', 'Light', 'Superhuman', 'Death Step', 'Yoru'];
             itemsToBuy.forEach(item => {
                 let btn = document.getElementById('btn-' + item.replace(" ", ""));
@@ -197,11 +250,15 @@
             if (e.key === 'Enter') {
                 const val = e.target.value;
                 e.target.value = "";
-                if(!isAdmin) return alert("Not an admin!");
+                if(val === "") return;
                 
-                if(val.startsWith("/lvl ")) { currentLevel = parseInt(val.split(" ")[1]); updateUI(); }
-                else if(val === "/g") { currentMoney = 99999999; updateUI(); }
-                else if(val === "/br") { player.position.set(0, 2, 0); }
+                addChat(`${currentUser}: ${val}`);
+                
+                if(val.startsWith("/") && isAdmin) {
+                    if(val.startsWith("/lvl ")) { currentLevel = parseInt(val.split(" ")[1]); updateUI(); }
+                    else if(val === "/g") { currentMoney = 99999999; updateUI(); }
+                    else if(val === "/br") { player.position.set(0, 2, 0); }
+                }
             }
         }
 
@@ -211,6 +268,16 @@
             document.querySelectorAll('.menu-btn')[2].innerText = "SEA " + currentSea;
             if(currentSea === 1) { ground.material.color.setHex(0x8b5a2b); scene.background.setHex(0x87CEEB); }
             else { ground.material.color.setHex(0xffffff); scene.background.setHex(0x445566); }
+            addChat(`Server: Moved to SEA ${currentSea}`);
+        }
+
+        function jump() {
+            if(isGrounded) { velocityY = 0.4; isGrounded = false; }
+        }
+
+        function dash() {
+            currentSpeed = 1.5; 
+            setTimeout(() => { currentSpeed = baseSpeed; }, 300); 
         }
 
         function startGame() {
@@ -218,27 +285,55 @@
             isGameRunning = true;
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+            scene.fog = new THREE.Fog(0x87CEEB, 30, 150);
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
             scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(10, 20, 10); scene.add(dirLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(20, 50, 20); scene.add(dirLight);
 
-            const groundGeo = new THREE.BoxGeometry(100, 2, 100);
+            const groundGeo = new THREE.BoxGeometry(200, 2, 200);
             const groundMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b });
             ground = new THREE.Mesh(groundGeo, groundMat); ground.position.y = -1; scene.add(ground);
 
+            // Custom Blocky Avatar (Roblox Style)
             player = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), new THREE.MeshLambertMaterial({ color: 0x111111 })); body.position.y = 1.5; player.add(body);
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshLambertMaterial({ color: 0xffcc99 })); head.position.y = 3.6; player.add(head);
-            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x111111 })); leftLeg.position.set(-0.5, 0, 0); player.add(leftLeg);
-            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x111111 })); rightLeg.position.set(0.5, 0, 0); player.add(rightLeg);
-            const leftWing = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 1.5), new THREE.MeshLambertMaterial({ color: 0xffffff })); leftWing.position.set(-1.2, 2, -0.5); leftWing.rotation.z = 0.3; player.add(leftWing);
-            const rightWing = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 1.5), new THREE.MeshLambertMaterial({ color: 0xffffff })); rightWing.position.set(1.2, 2, -0.5); rightWing.rotation.z = -0.3; player.add(rightWing);
+
+            // Torso (Black shirt)
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 1), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+            torso.position.y = 2.5; player.add(torso);
+
+            // Head (Skin + Face)
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshLambertMaterial({ color: 0xffcc99 }));
+            head.position.y = 4.1; player.add(head);
+            
+            const face = new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 0.1), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            face.position.set(0, 4.2, 0.61); player.add(face);
+
+            // Legs (Black pants)
+            const legGeo = new THREE.BoxGeometry(0.8, 2, 0.8);
+            const legMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+            const leftLeg = new THREE.Mesh(legGeo, legMat); leftLeg.position.set(-0.5, 0.5, 0); player.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, legMat); rightLeg.position.set(0.5, 0.5, 0); player.add(rightLeg);
+
+            // Wings (White)
+            const wingGeo = new THREE.BoxGeometry(0.2, 2.5, 1.2);
+            const wingMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            const leftWing = new THREE.Mesh(wingGeo, wingMat); leftWing.position.set(-1.3, 2.8, -0.6); leftWing.rotation.z = 0.4; player.add(leftWing);
+            const rightWing = new THREE.Mesh(wingGeo, wingMat); rightWing.position.set(1.3, 2.8, -0.6); rightWing.rotation.z = -0.4; player.add(rightWing);
+
             scene.add(player);
+
+            // NPC (Bandit)
+            npc = new THREE.Group();
+            const npcTorso = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 1), new THREE.MeshLambertMaterial({ color: 0x880000 })); npcTorso.position.y = 2.5; npc.add(npcTorso);
+            const npcHead = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshLambertMaterial({ color: 0xffcc99 })); npcHead.position.y = 4.1; npc.add(npcHead);
+            const npcLegL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x222222 })); npcLegL.position.set(-0.5, 0.5, 0); npc.add(npcLegL);
+            const npcLegR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshLambertMaterial({ color: 0x222222 })); npcLegR.position.set(0.5, 0.5, 0); npc.add(npcLegR);
+            npc.position.set(10, 0, -10);
+            scene.add(npc);
 
             animate();
         }
@@ -246,13 +341,18 @@
         function animate() {
             requestAnimationFrame(animate);
             if(player) {
+                velocityY += gravity;
+                player.position.y += velocityY;
+                if(player.position.y <= 0) { player.position.y = 0; velocityY = 0; isGrounded = true; }
+
                 player.position.x += moveX * currentSpeed;
                 player.position.z += moveZ * currentSpeed;
                 if (moveX !== 0 || moveZ !== 0) player.rotation.y = Math.atan2(moveX, moveZ);
+
                 camera.position.x = player.position.x;
-                camera.position.y = player.position.y + 12;
-                camera.position.z = player.position.z + 18;
-                camera.lookAt(player.position.x, player.position.y + 2, player.position.z);
+                camera.position.y = player.position.y + 15;
+                camera.position.z = player.position.z + 20;
+                camera.lookAt(player.position.x, player.position.y + 3, player.position.z);
             }
             renderer.render(scene, camera);
         }
@@ -263,57 +363,51 @@
             cooldowns[num] = true;
             btn.classList.add('cooling');
 
-            if(equippedItem === "True Triple Yoru") {
-                for(let i=0; i<3; i++) {
+            // Blox Fruits Style Effects
+            if(equippedItem === "True Triple Yoru" || equippedItem === "Yoru") {
+                // Light Green Slashes
+                const isTriple = equippedItem === "True Triple Yoru";
+                const slashCount = isTriple ? 3 : 1;
+                
+                for(let i=0; i<slashCount; i++) {
                     setTimeout(() => {
-                        const slashGeo = new THREE.BoxGeometry(0.2, 1, 15);
-                        const slashMat = new THREE.MeshBasicMaterial({ color: 0x880000 }); 
+                        const slashGeo = new THREE.BoxGeometry(0.3, 3, 25);
+                        const slashMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.8 }); // Light Green
                         const slash = new THREE.Mesh(slashGeo, slashMat);
                         slash.position.copy(player.position);
                         slash.rotation.y = player.rotation.y;
-                        slash.position.x += Math.cos(player.rotation.y) * (i * 2 - 2); 
-                        slash.position.z -= Math.sin(player.rotation.y) * (i * 2 - 2); 
+                        if(isTriple) {
+                            slash.position.x += Math.cos(player.rotation.y) * (i * 3 - 3); 
+                            slash.position.z -= Math.sin(player.rotation.y) * (i * 3 - 3); 
+                        } else {
+                            slash.position.x += Math.sin(player.rotation.y) * 5;
+                            slash.position.z += Math.cos(player.rotation.y) * 5;
+                        }
                         slash.position.y += 2;
                         scene.add(slash);
-                        let life = 0;
-                        let moveInt = setInterval(() => {
-                            slash.position.x += Math.sin(player.rotation.y) * 1.5;
-                            slash.position.z += Math.cos(player.rotation.y) * 1.5;
-                            life += 1;
-                            if(life > 10) { clearInterval(moveInt); scene.remove(slash); }
-                        }, 30);
+                        setTimeout(() => scene.remove(slash), 400);
                     }, i * 100);
                 }
             } else if(equippedItem === "Rumble") {
-                const beamGeo = new THREE.CylinderGeometry(0.5, 0.5, 15, 8);
+                const beamGeo = new THREE.CylinderGeometry(0.5, 0.5, 25, 8);
                 const beamMat = new THREE.MeshBasicMaterial({ color: 0x00ffff }); 
                 const beam = new THREE.Mesh(beamGeo, beamMat);
                 beam.position.copy(player.position);
                 beam.position.y += 2;
                 beam.rotation.x = Math.PI / 2;
                 beam.rotation.y = player.rotation.y;
-                beam.position.x += Math.sin(player.rotation.y) * 7.5;
-                beam.position.z += Math.cos(player.rotation.y) * 7.5;
+                beam.position.x += Math.sin(player.rotation.y) * 12;
+                beam.position.z += Math.cos(player.rotation.y) * 12;
                 scene.add(beam);
                 setTimeout(() => scene.remove(beam), 300);
-            } else if(equippedItem === "Light") {
-                const kickGeo = new THREE.SphereGeometry(2, 16, 16);
-                const kickMat = new THREE.MeshBasicMaterial({ color: 0xffff00 }); 
-                const kick = new THREE.Mesh(kickGeo, kickMat);
-                kick.position.copy(player.position);
-                kick.position.y += 2;
-                kick.position.x += Math.sin(player.rotation.y) * 4;
-                kick.position.z += Math.cos(player.rotation.y) * 4;
-                scene.add(kick);
-                setTimeout(() => scene.remove(kick), 300);
             } else {
-                const punchGeo = new THREE.SphereGeometry(1, 8, 8);
-                const punchMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const punchGeo = new THREE.SphereGeometry(1.5, 8, 8);
+                const punchMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
                 const punch = new THREE.Mesh(punchGeo, punchMat);
                 punch.position.copy(player.position);
                 punch.position.y += 2;
-                punch.position.x += Math.sin(player.rotation.y) * 3;
-                punch.position.z += Math.cos(player.rotation.y) * 3;
+                punch.position.x += Math.sin(player.rotation.y) * 4;
+                punch.position.z += Math.cos(player.rotation.y) * 4;
                 scene.add(punch);
                 setTimeout(() => scene.remove(punch), 200);
             }
@@ -321,7 +415,7 @@
             setTimeout(() => { 
                 cooldowns[num] = false; 
                 btn.classList.remove('cooling');
-            }, 1500); 
+            }, 1000); 
         }
 
         function setupJoystick() {
@@ -345,6 +439,7 @@
             if(e.key === '2') useSkill(2);
             if(e.key === '3') useSkill(3);
             if(e.key === '4') useSkill(4);
+            if(e.key === ' ') jump();
         });
     </script>
 </body>
