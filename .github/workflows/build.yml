@@ -6,58 +6,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    # Run on Mac so we have Xcode, but we won't let Godot compile the binary
-    runs-on: macos-latest
+  build-ios:
+    runs-on: ubuntu-latest # The strong server that never crashes
     
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v1
-        with:
-          version: 4.2.1
-          use-dotnet: false
+      - name: Download Godot
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
+          unzip -q Godot_v4.2.1-stable_linux.x86_64.zip
+          chmod +x Godot_v4.2.1-stable_linux.x86_64
 
       - name: Download Export Templates
         run: |
           wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          mkdir -p /Users/runner/Library/Application\ Support/Godot/export_templates/4.2.1.stable
-          tar -xvzf Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* /Users/runner/Library/Application\ Support/Godot/export_templates/4.2.1.stable/
+          mkdir -p /home/runner/.local/share/godot/export_templates/4.2.1.stable
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mv templates/* /home/runner/.local/share/godot/export_templates/4.2.1.stable/
 
-      - name: Generate Xcode Project Only
+      - name: Build Game Data (PCK)
         run: |
           mkdir -p build
-          # We tell Godot to ONLY generate the Xcode files, NOT to compile the binary
-          godot --headless --export-release "iOS" build/Sea_Legacy.ipa
+          ./Godot_v4.2.1-stable_linux.x86_64 --headless --export-release "Linux" build/Sea_Legacy.pck
 
-      - name: Compile with Xcode
+      - name: Assemble iOS App
         run: |
-          cd build/Sea_Legacy.ios
+          # 1. Extract the pre-compiled iOS App template
+          unzip -q /home/runner/.local/share/godot/export_templates/4.2.1.stable/ios.zip -d ios_template
           
-          # Use Apple's compiler to build the app
-          xcodebuild build \
-            -project Sea_Legacy.xcodeproj \
-            -scheme Sea_Legacy \
-            -configuration Release \
-            -sdk iphoneos \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+          # 2. Create the Apple Payload folder structure
+          mkdir -p build/Payload
+          
+          # 3. Move the app template into Payload
+          mv ios_template/Godot.app build/Payload/Sea_Legacy.app
+          
+          # 4. Rename the executable so LiveContainer recognizes it
+          mv build/Payload/Sea_Legacy.app/Godot build/Payload/Sea_Legacy.app/Sea_Legacy
+          
+          # 5. Inject your game data into the app
+          cp build/Sea_Legacy.pck build/Payload/Sea_Legacy.app/
+          
+          # 6. Update Info.plist with your app name
+          sed -i '' 's/<string>Godot<\/string>/<string>Sea Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
+          sed -i '' 's/<string>org.godotengine.godot<\/string>/<string>com.prince.sealegacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist
+          sed -i '' 's/<string>Godot<\/string>/<string>Sea_Legacy<\/string>/g' build/Payload/Sea_Legacy.app/Info.plist || true
 
-      - name: Create IPA
+      - name: Zip into .ipa
         run: |
           cd build
-          mkdir -p Payload
-          
-          # Move the compiled app into the Payload folder
-          cp -r Sea_Legacy.ios/build/Build/Products/Release-iphoneos/Sea_Legacy.app Payload/
-          
-          # Zip it into an IPA
           zip -r SeaLegacy.ipa Payload/
+          ls -la SeaLegacy.ipa
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
