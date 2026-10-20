@@ -3,6 +3,7 @@
   "appName": "Sea Legacy",
   "webDir": "www",
   "server": {
-    "cleartext": true
+    "cleartext": true,
+    "allowNavigation": ["*"]
   }
 }
